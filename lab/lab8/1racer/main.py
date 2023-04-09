@@ -22,6 +22,20 @@ background = pygame.image.load("images/AnimatedStreet.png")
 
 #Enemy
 class Enemy(pygame.sprite.Sprite):
+      def __init__(self):
+        super().__init__() 
+        self.image = pygame.image.load("images/Enemy.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = (random.randint(40, W-40), 0)  
+
+      def move(self):
+        self.rect.move_ip(0,SPEED)
+        if (self.rect.top > 600):
+            self.rect.top = 0
+            self.rect.center = (random.randint(40, W - 40), 0)
+
+#Coins
+class Coin(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         global coin_y
@@ -32,8 +46,8 @@ class Enemy(pygame.sprite.Sprite):
     def move(self):
         global SCORE
         self.rect.move_ip(0, SPEED)
-        if self.rect.bottom > 700 or pygame.sprite.spritecollideany(P1, enemies):
-            if pygame.sprite.spritecollideany(P1, enemies):
+        if self.rect.bottom > 700 or pygame.sprite.spritecollideany(P1, coins):
+            if pygame.sprite.spritecollideany(P1, coins):
                 SCORE += 1
             self.rect.top = 0
             self.rect.center = (random.randint(40, W-40),0)
@@ -58,14 +72,18 @@ class Player(pygame.sprite.Sprite):
 #Setting up Sprites
 E1 = Enemy()
 P1 = Player()
+C1 = Coin()
 b_y=0
 
 #Creating Sprites Groups
 enemies = pygame.sprite.Group()
+coins = pygame.sprite.Group()
+coins.add(C1)
 enemies.add(E1)
 all_sprites = pygame.sprite.Group()
 all_sprites.add(E1)
 all_sprites.add(P1)
+all_sprites.add(C1)
 
 #Adding a new User event
 # INC_SPEED = pygame.USEREVENT + 1
@@ -95,14 +113,19 @@ while running:
         entity.move()
 
     #To be run if collision occurs between Player and Enemy
-    # if pygame.sprite.spritecollideany(P1, enemies):
-
-
-        #   pygame.display.update()
-        #   for entity in all_sprites:
-        #       entity.kill() 
-        #   time.sleep(2)
-        #   pygame.quit()
+        if pygame.sprite.spritecollideany(P1, enemies):
+          pygame.mixer.Sound('sounds/crash.wav').play()
+          time.sleep(0.5)
+                    
+          screen.fill(pygame.Color('red'))
+          screen.blit(game_over, (30,250))
+           
+          pygame.display.update()
+          for entity in all_sprites:
+                entity.kill() 
+          time.sleep(2)
+          pygame.quit()
+          exit()
     b_y+=5
 
     if b_y > 600:
